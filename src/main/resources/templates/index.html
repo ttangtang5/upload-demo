@@ -1,0 +1,51 @@
+<html>
+<head>
+    <title>上传文件</title>
+    <script src="/jquery.js"></script>
+</head>
+<body>
+    <form method="post" action="/upload/handler" enctype="multipart/form-data" target="upload_frame" onsubmit="return uploadClick()">
+        <input type="file" name="uploadFile">
+        <input type="submit" value="上传" >
+    </form>
+    <ul>
+        <li>上传文件大小：</li>
+        <li>上传文件速率：</li>
+        <li>上传完成百分比：</li>
+    </ul>
+
+    <!--防止表单提交跳转-->
+    <iframe name="upload_frame" style="display:none"></iframe>
+
+    <script>
+        var intervalFlag = null;
+
+        function uploadClick() {
+            console.log('trigger click');
+
+            setTimeout(function () {
+                intervalFlag = setInterval(getMsg, 1000);
+            }, 1000);
+        }
+
+        function getMsg() {
+            $.ajax({
+                url: "/upload/getMsg",
+                method: "get",
+                success: function (msg) {
+                    if (msg.percent == 100) {
+                        clearInterval(intervalFlag);
+                    }
+                    console.log(msg);
+                    console.log(typeof msg.bytesRead);
+                    var size = (msg.bytesRead / 1024 / 1024).toFixed(2);
+                    $("ul li")[0].innerHTML = "上传文件大小：" + size + "MB";
+                    $("ul li")[1].innerHTML = "上传文件速率：" + msg.uploadRate + "KB";
+                    $("ul li")[2].innerHTML = "上传完成百分比:" + msg.percent + "%";
+
+                }
+            })
+        }
+    </script>
+</body>
+</html>
